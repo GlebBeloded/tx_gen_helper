@@ -12,6 +12,7 @@ import (
 //MsgAd store information about advertisment
 type MsgAd struct {
 	IntegrationID string `json:"integration_id"`
+	AdTime        int64  `json:"integration_time"`
 	Fingerprint   string `json:"fingerprint"`
 }
 
@@ -48,16 +49,22 @@ func NewMsgRegisterListeningSession(addr string, start, end string, channel stri
 
 func GenerateFingerprints(user string, ads ...string) (output []MsgAd) {
 
-	for _, i := range ads {
-		bytes, err := ioutil.ReadFile(AdBytesPath + "/" + i)
+	for i := 0; i < len(ads); i = i + 2 {
+		bytes, err := ioutil.ReadFile(AdBytesPath + "/" + ads[i])
 		if err != nil {
 			panic(err)
 		}
 
 		fprint := base64.StdEncoding.EncodeToString(UserHash(user, string(bytes)))
 
+		time, err := strconv.Atoi(ads[i+1])
+		if err != nil {
+			panic(err)
+		}
+
 		output = append(output, MsgAd{
-			IntegrationID: i,
+			IntegrationID: ads[i],
+			AdTime:        int64(time),
 			Fingerprint:   fprint,
 		})
 	}

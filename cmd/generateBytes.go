@@ -16,46 +16,30 @@ limitations under the License.
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/spf13/cobra"
-	"inside.omertex.com/txgen/codec"
 	"inside.omertex.com/txgen/session"
-	"inside.omertex.com/txgen/stdTx"
 )
 
-// distributeRewardsCmd represents the distributeRewards command
-var distributeRewardsCmd = &cobra.Command{
-	Use:   "distribute-rewards [integration_id...]",
-	Short: "create distribute-rewards tx as well as generate and store ad_bytes",
-	Args:  cobra.MinimumNArgs(0),
+// generateBytesCmd represents the generateBytes command
+var generateBytesCmd = &cobra.Command{
+	Use:   "generateBytes",
+	Short: "create random bytes for given integration ids",
+	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-
-		msg := session.NewMsgDistributeRewards(args)
-
-		if len(msg.Ads) == 0 {
-			msg.Ads = append(msg.Ads, session.MsgIntegrationData{IntegrationID: "plug", AdBytes: ""})
-		}
-
-		tx := stdTx.NewTx(msg)
-		bytes, err := codec.Codec.MarshalJSONIndent(tx, "", "\t")
-		if err != nil {
-			panic(err)
-		}
-		fmt.Print(string(bytes))
+		session.SaveAdBytesToOS(args...)
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(distributeRewardsCmd)
+	rootCmd.AddCommand(generateBytesCmd)
 
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
-	// distributeRewardsCmd.PersistentFlags().String("foo", "", "A help for foo")
+	// generateBytesCmd.PersistentFlags().String("foo", "", "A help for foo")
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	// distributeRewardsCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	// generateBytesCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }

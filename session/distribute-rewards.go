@@ -1,8 +1,7 @@
 package session
 
 import (
-	"crypto/rand"
-	"encoding/base64"
+	"io/ioutil"
 	"os"
 )
 
@@ -23,73 +22,17 @@ type MsgDistributeRewards struct {
 }
 
 //NewMsgDistributeRewards creates new Send ad message
-func NewMsgDistributeRewards(adArray []MsgIntegrationData) MsgDistributeRewards {
+func NewMsgDistributeRewards(ids []string) MsgDistributeRewards {
 
-	for _, i := range adArray {
-		save(i)
-	}
-
-	return MsgDistributeRewards{
-		Ads: adArray,
-	}
-}
-
-func MakeIntegrationDataArray(args ...string) []MsgIntegrationData {
-
-	var result []MsgIntegrationData
-
-	for _, i := range args {
-		bytes := make([]byte, 32)
-		rand.Read(bytes)
-
-		result = append(result, MsgIntegrationData{
-			IntegrationID: i,
-			AdBytes:       base64.StdEncoding.EncodeToString(bytes),
-		})
-	}
-	return result
-}
-
-func save(msg MsgIntegrationData) {
-	boolExists, err := Exists(AdBytesPath)
-	if err != nil {
-		panic(err)
-	}
-
-	if !boolExists {
-		err = os.Mkdir(AdBytesPath, 0755)
+	var array []MsgIntegrationData
+	for _, i := range ids {
+		bytes, err := ioutil.ReadFile(AdBytesPath + "/" + i)
 		if err != nil {
 			panic(err)
 		}
+		array = append(array, MsgIntegrationData{IntegrationID: i, AdBytes: string(bytes)})
 	}
-
-	filepath := AdBytesPath + "/" + msg.IntegrationID
-
-	boolExists, err = Exists(filepath)
-	if err != nil {
-		panic(err)
+	return MsgDistributeRewards{
+		Ads: array,
 	}
-
-	if boolExists {
-		panic("IntegrationID with the given name already exists")
-	}
-
-	file, err := os.Create(filepath)
-	if err != nil {
-		panic(err)
-	}
-
-	file.WriteString(msg.AdBytes)
-	file.Close()
-}
-
-func Exists(path string) (bool, error) {
-	_, err := os.Stat(path)
-	if err == nil {
-		return true, nil
-	}
-	if os.IsNotExist(err) {
-		return false, nil
-	}
-	return true, err
 }

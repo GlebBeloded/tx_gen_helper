@@ -26,10 +26,13 @@ import (
 
 // registerSessionCmd represents the registerSession command
 var registerSessionCmd = &cobra.Command{
-	Use:   "register-session [addr] [time_begin] [time_end] [channel] [integration_id...] ",
+	Use:   "register-session [addr] [time_begin] [time_end] [channel] [integration_id,timestamp...] ",
 	Short: "",
 
 	Run: func(cmd *cobra.Command, args []string) {
+		if (len(args)-4)%2 != 0 {
+			panic("invalid arguments")
+		}
 		msg := session.NewMsgRegisterListeningSession(args[0], args[1], args[2], args[3], args[4:]...)
 		tx := stdTx.NewTx(msg)
 		bytes, err := codec.Codec.MarshalJSONIndent(tx, "", "\t")
