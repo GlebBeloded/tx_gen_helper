@@ -22,7 +22,7 @@ import (
 
 // generateBytesCmd represents the generateBytes command
 var generateBytesCmd = &cobra.Command{
-	Use:   "generateBytes",
+	Use:   "generate-bytes",
 	Short: "create random bytes for given integration ids",
 	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
