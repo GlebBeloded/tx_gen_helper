@@ -31,6 +31,9 @@ var distributeRewardsCmd = &cobra.Command{
 	Args:  cobra.MinimumNArgs(0),
 	Run: func(cmd *cobra.Command, args []string) {
 
+		gas_val, _ := cmd.Flags().GetInt("gas")
+		stdTx.GasValue = int(gas_val)
+
 		msg := session.NewMsgDistributeRewards(args)
 
 		if len(msg.Ads) == 0 {
@@ -48,6 +51,7 @@ var distributeRewardsCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(distributeRewardsCmd)
+	distributeRewardsCmd.PersistentFlags().Int("gas", 200000, "set custom gas value for tx")
 
 	// Here you will define your flags and configuration settings.
 

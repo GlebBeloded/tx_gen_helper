@@ -1,5 +1,8 @@
 package stdTx
 
+// default gas value
+var GasValue = 200000
+
 type Value struct {
 	Msg        []Msg       `json:"msg"`
 	Fee        Fee         `json:"fee"`
@@ -39,7 +42,7 @@ type PubKey struct {
 func NewTx(message Msg) Tx {
 	return Tx{
 		Msg:        []Msg{message},
-		Fee:        Fee{Amount: []Coin{}, Gas: 200000},
+		Fee:        Fee{Amount: []Coin{}, Gas: GasValue},
 		Signatures: nil,
 	}
 }
