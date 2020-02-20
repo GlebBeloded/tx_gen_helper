@@ -1,10 +1,12 @@
 txgen clear
 
+set -e
+
 NOW=`date +%s`
 BEFORE=`expr $NOW - 1000`
 AFTER=`expr $NOW + 1000`
 
-txgen register-poll stest $BEFORE $AFTER 6 > poll_unsigned.json
+txgen register-poll stest $BEFORE $AFTER 10mfmc 5  > poll_unsigned.json
 printf '12345678\n12345678\n' |melcli tx sign poll_unsigned.json --from master > poll_signed.json
 melcli tx broadcast poll_signed.json --broadcast-mode block
 txgen submit-poll stest $NOW $(melcli keys show jack -a) 1> jack_poll_unsigned.json

@@ -3,6 +3,9 @@ package session
 import (
 	"io/ioutil"
 	"os"
+
+	sdk "inside.omertex.com/bitbucket/scm/mf/blockchain_mediafm.git/types"
+	"inside.omertex.com/bitbucket/scm/mf/blockchain_sdk.git/x/melodia"
 )
 
 var (
@@ -10,19 +13,13 @@ var (
 	AdBytesPath = home + "/.ads"
 )
 
-//MsgIntegrationData represents information about a certain integration
-type MsgIntegrationData struct {
-	IntegrationID string `json:"integration_id"`
-	AdBytes       string `json:"ad_bytes"`
-}
-
-//MsgDistributeRewards is an array of MsgReward
-type MsgDistributeRewards struct {
-	Ads []MsgIntegrationData `json:"ads"`
-}
+type (
+	MsgIntegrationData   = melodia.MsgIntegrationData
+	MsgDistributeRewards = melodia.MsgDistributeRewards
+)
 
 //NewMsgDistributeRewards creates new Send ad message
-func NewMsgDistributeRewards(ids []string) MsgDistributeRewards {
+func NewMsgDistributeRewards(payout sdk.Coin, ids []string) MsgDistributeRewards {
 
 	var array []MsgIntegrationData
 	for _, i := range ids {
@@ -33,6 +30,7 @@ func NewMsgDistributeRewards(ids []string) MsgDistributeRewards {
 		array = append(array, MsgIntegrationData{IntegrationID: i, AdBytes: string(bytes)})
 	}
 	return MsgDistributeRewards{
-		Ads: array,
+		Ads:         array,
+		TotalPayout: payout,
 	}
 }

@@ -19,6 +19,7 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
+	sdk "inside.omertex.com/bitbucket/scm/mf/blockchain_mediafm.git/types"
 	"inside.omertex.com/txgen/codec"
 	"inside.omertex.com/txgen/session"
 	"inside.omertex.com/txgen/stdTx"
@@ -26,15 +27,19 @@ import (
 
 // distributeRewardsCmd represents the distributeRewards command
 var distributeRewardsCmd = &cobra.Command{
-	Use:   "distribute-rewards [integration_id...]",
+	Use:   "distribute-rewards [payout] [integration_id...]",
 	Short: "create distribute-rewards tx as well as generate and store ad_bytes",
 	Args:  cobra.MinimumNArgs(0),
 	Run: func(cmd *cobra.Command, args []string) {
 
 		gas_val, _ := cmd.Flags().GetInt("gas")
 		stdTx.GasValue = int(gas_val)
-
-		msg := session.NewMsgDistributeRewards(args)
+		ads := args[1:]
+		payout, err := sdk.ParseCoin(args[0])
+		if err != nil {
+			panic(err.Error())
+		}
+		msg := session.NewMsgDistributeRewards(payout, ads)
 
 		if len(msg.Ads) == 0 {
 			msg.Ads = append(msg.Ads, session.MsgIntegrationData{IntegrationID: "plug", AdBytes: ""})

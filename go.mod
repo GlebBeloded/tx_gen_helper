@@ -15,5 +15,5 @@ require (
 	golang.org/x/text v0.3.2 // indirect
 	golang.org/x/tools/gopls v0.1.7 // indirect
 	inside.omertex.com/bitbucket/scm/mf/blockchain_mediafm.git v0.6.1
-	inside.omertex.com/bitbucket/scm/mf/blockchain_sdk.git v0.1.3
+	inside.omertex.com/bitbucket/scm/mf/blockchain_sdk.git v0.1.4
 )
