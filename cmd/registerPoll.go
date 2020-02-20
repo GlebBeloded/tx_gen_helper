@@ -18,7 +18,10 @@ package cmd
 import (
 	"fmt"
 
+	"strconv"
+
 	"github.com/spf13/cobra"
+	sdk "inside.omertex.com/bitbucket/scm/mf/blockchain_mediafm.git/types"
 	"inside.omertex.com/txgen/codec"
 	"inside.omertex.com/txgen/poll"
 	"inside.omertex.com/txgen/stdTx"
@@ -26,13 +29,21 @@ import (
 
 // registerPollCmd represents the registerPoll command
 var registerPollCmd = &cobra.Command{
-	Use:   "register-poll [PollID] [start timestamp] [end timestamp] [coefficient]",
+	Use:   "register-poll [PollID] [start timestamp] [end timestamp] [payout] [limit]",
 	Short: fmt.Sprintf("returns registerPoll unsigned tx and creates keypair in %s", poll.PollKeysPath),
-	Args:  cobra.ExactArgs(4),
+	Args:  cobra.ExactArgs(5),
 	Run: func(cmd *cobra.Command, args []string) {
+		coin, err := sdk.ParseCoin(args[3])
+		if err != nil {
+			panic(err)
+		}
+		limit, err := strconv.Atoi(args[4])
+		if err != nil {
+			panic(err)
+		}
 		poll := poll.NewMsgRegisterPoll(
 			args[0],
-			args[1], args[2], args[3])
+			args[1], args[2], coin, limit)
 		tx := stdTx.NewTx(poll)
 
 		output, err := codec.Codec.MarshalJSONIndent(tx, "", "\t")

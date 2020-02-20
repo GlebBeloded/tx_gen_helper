@@ -10,18 +10,15 @@ import (
 	"encoding/pem"
 	"fmt"
 	"io/ioutil"
-	"strconv"
 
 	sdk "inside.omertex.com/bitbucket/scm/mf/blockchain_mediafm.git/types"
+
+	"strconv"
+
+	"inside.omertex.com/bitbucket/scm/mf/blockchain_sdk.git/x/melodia"
 )
 
-//MsgPollSubmission is used to register user completing survey
-type MsgPollSubmission struct {
-	PollID         string `json:"poll_id"`
-	SubmissionTime int64  `json:"submission_time"`
-	AccAddr        string `json:"address"`
-	Signature      string `json:"signature"`
-}
+type MsgPollSubmission = melodia.MsgPollSubmission
 
 type submissionForSigning struct {
 	PollID         string `json:"poll_id"`
@@ -86,14 +83,17 @@ func NewMsgPollSubmission(PollID string, SubmissionTime string, AccAddr string) 
 	if err != nil {
 		panic(err)
 	}
-
 	forSig := NewSubsubmissionForSigning(PollID, int64(number), AccAddr)
 	key := getKey(PollID)
 	signature := forSig.sign(key)
+	addr, err := sdk.AccAddressFromBech32(AccAddr)
+	if err != nil {
+		panic(err.Error())
+	}
 	return MsgPollSubmission{
 		PollID:         PollID,
 		SubmissionTime: int64(number),
-		AccAddr:        AccAddr,
+		AccAddr:        addr,
 		Signature:      base64.StdEncoding.EncodeToString(signature),
 	}
 }

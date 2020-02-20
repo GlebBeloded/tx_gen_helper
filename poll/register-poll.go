@@ -8,6 +8,9 @@ import (
 	"encoding/pem"
 	"os"
 	"strconv"
+
+	sdk "inside.omertex.com/bitbucket/scm/mf/blockchain_mediafm.git/types"
+	"inside.omertex.com/bitbucket/scm/mf/blockchain_sdk.git/x/melodia"
 )
 
 var (
@@ -15,22 +18,16 @@ var (
 	PollKeysPath = home + "/.pollKeys"
 )
 
-type MsgRegisterPoll struct {
-	PollID      string `json:"poll_id"`
-	StartTime   int64  `json:"start_time"`
-	EndTime     int64  `json:"end_time"`
-	PubKey      string `json:"public_key"`
-	Coefficient uint8  `json:"coefficient"`
-}
+type MsgRegisterPoll = melodia.MsgRegisterPoll
 
-func NewMsgRegisterPoll(PollID string, startTime, endTime string, Coefficient string) MsgRegisterPoll {
+func NewMsgRegisterPoll(PollID string, startTime, endTime string, amount sdk.Coin, limit int) MsgRegisterPoll {
 
 	key, err := rsa.GenerateKey(rand.Reader, 2048)
 	if err != nil {
 		panic(err)
 	}
 
-	var startTimeT, endTimeT, coef int
+	var startTimeT, endTimeT int
 
 	startTimeT, err = strconv.Atoi(startTime)
 	if err != nil {
@@ -42,19 +39,15 @@ func NewMsgRegisterPoll(PollID string, startTime, endTime string, Coefficient st
 		panic(err)
 	}
 
-	coef, err = strconv.Atoi(Coefficient)
-	if err != nil {
-		panic(err)
-	}
-
 	saveKey(key, PollID)
 
 	return MsgRegisterPoll{
-		PollID:      PollID,
-		StartTime:   int64(startTimeT),
-		EndTime:     int64(endTimeT),
-		PubKey:      base64.StdEncoding.EncodeToString(x509.MarshalPKCS1PublicKey(&key.PublicKey)),
-		Coefficient: uint8(coef),
+		PollID:    PollID,
+		StartTime: int64(startTimeT),
+		EndTime:   int64(endTimeT),
+		PubKey:    base64.StdEncoding.EncodeToString(x509.MarshalPKCS1PublicKey(&key.PublicKey)),
+		Amount:    amount,
+		Limit:     limit,
 	}
 }
 
