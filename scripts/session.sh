@@ -1,11 +1,14 @@
 txgen clear
-
+set -e
 NOW=`date +%s`
 BEFORE=`expr $NOW - 1000`
 AD_TIME=`expr $NOW - 100`
 
-txgen generate-bytes test
-txgen distribute-rewards test > master_unsigned.json
+#Givin` dat fat cash to tha aggregata`
+printf '12345678\n' | melcli tx melodia aggregate $(melcli keys show jack -a) 100mfmc --from jack -y -b block
+
+txgen generate-bytes  test
+txgen distribute-rewards  100mfmc test > master_unsigned.json
 txgen register-session $(melcli keys show jack -a) $BEFORE $NOW melodia test $AD_TIME > jack_unsigned.json
 txgen register-session $(melcli keys show alice -a) $BEFORE $NOW melodia test $AD_TIME > alice_unsigned.json
 printf '12345678\n12345678\n' |melcli tx sign jack_unsigned.json --from jack > jack_signed.json
