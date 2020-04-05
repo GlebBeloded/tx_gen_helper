@@ -17,6 +17,7 @@ package cmd
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/spf13/cobra"
 	sdk "inside.omertex.com/bitbucket/scm/mf/blockchain_mediafm.git/types"
@@ -27,23 +28,19 @@ import (
 
 // distributeRewardsCmd represents the distributeRewards command
 var distributeRewardsCmd = &cobra.Command{
-	Use:   "distribute-rewards [payout] [integration_id...]",
+	Use:   "distribute-rewards [integration_id] [payout] [num listeners] [ad_bytes] [addr]...",
 	Short: "create distribute-rewards tx as well as generate and store ad_bytes",
 	Args:  cobra.MinimumNArgs(0),
 	Run: func(cmd *cobra.Command, args []string) {
 
 		gas_val, _ := cmd.Flags().GetInt("gas")
 		stdTx.GasValue = int(gas_val)
-		ads := args[1:]
-		payout, err := sdk.ParseCoin(args[0])
-		if err != nil {
-			panic(err.Error())
-		}
-		msg := session.NewMsgDistributeRewards(payout, ads)
 
-		if len(msg.Ads) == 0 {
-			msg.Ads = append(msg.Ads, session.MsgIntegrationData{IntegrationID: "plug", AdBytes: ""})
+		integrations, err := parseIntegrations(args)
+		if err != nil {
+			panic(err)
 		}
+		msg := session.NewMsgDistributeRewards(integrations)
 
 		tx := stdTx.NewTx(msg)
 		bytes, err := codec.Codec.MarshalJSONIndent(tx, "", "\t")
@@ -52,6 +49,55 @@ var distributeRewardsCmd = &cobra.Command{
 		}
 		fmt.Print(string(bytes))
 	},
+}
+
+func MustGetAddr(s string) sdk.AccAddress {
+	addr, err := sdk.AccAddressFromBech32(s)
+	if err != nil {
+		panic(err)
+	}
+	return addr
+}
+
+func parseIntegrations(s []string) ([]session.Integration, error) {
+	if len(s) == 0 {
+		return nil, nil
+	}
+	integratations := make([]session.Integration, 0)
+	index := 0
+	for index != len(s) {
+		// create inetgration to store the data while we parse it
+		var i session.Integration
+		// first parse integration id
+		i.ID = s[index]
+		index++
+		// now parse coins
+		payout, err := sdk.ParseCoin(s[index])
+		if err != nil {
+			return nil, err
+		}
+		i.Payout = payout
+		index++
+		// get amount of integrations
+		num, err := strconv.Atoi(s[index])
+		if err != nil {
+			return nil, err
+		}
+		index++
+		i.Listeners = make([]session.Pair, 0, num)
+		// parse each addr-bytes pair
+		for iter := 0; iter < num; iter++ {
+			var p session.Pair
+			p.Bytes = session.GetBytes(s[index])
+			index++
+			p.Addr = MustGetAddr(s[index])
+			index++
+			i.Listeners = append(i.Listeners, p)
+		}
+		integratations = append(integratations, i)
+	}
+
+	return integratations, nil
 }
 
 func init() {

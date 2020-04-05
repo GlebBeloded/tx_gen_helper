@@ -3,11 +3,23 @@ package session
 import (
 	"crypto/rand"
 	"encoding/base64"
+	"io/ioutil"
 	"os"
 )
 
-func SaveAdBytesToOS(args ...string) {
+func GetBytes(s string) []byte {
+	bytes, err := ioutil.ReadFile(AdBytesPath + "/" + s)
+	if err != nil {
+		panic(err)
+	}
+	bytes, err = base64.StdEncoding.DecodeString(string(bytes))
+	if err != nil {
+		panic(err)
+	}
+	return bytes
+}
 
+func SaveAdBytesToOS(args ...string) {
 	for _, i := range args {
 		bytes := make([]byte, 32)
 		rand.Read(bytes)
@@ -44,7 +56,6 @@ func checkExists(id string) {
 }
 
 func save(id, adBytes string) {
-
 	filepath := AdBytesPath + "/" + id
 
 	file, err := os.Create(filepath)

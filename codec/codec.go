@@ -15,7 +15,6 @@ func RegisterCodec(cdc *amino.Codec) {
 	Codec.RegisterConcrete(stdTx.Tx{}, "cosmos-sdk/StdTx", nil)
 	cdc.RegisterConcrete(session.MsgAd{}, "melodia/Ad", nil)
 	cdc.RegisterConcrete(session.MsgRegisterListeningSession{}, "melodia/ListeningSession", nil)
-	cdc.RegisterConcrete(session.MsgIntegrationData{}, "melodia/IntegrationData", nil)
 	cdc.RegisterConcrete(session.MsgDistributeRewards{}, "melodia/DistributeRewards", nil)
 	Codec.RegisterConcrete(poll.MsgRegisterPoll{}, "melodia/RegisterPoll", nil)
 	Codec.RegisterConcrete(poll.MsgPollSubmission{}, "melodia/SubmitPoll", nil)
